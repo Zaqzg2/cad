@@ -37,6 +37,26 @@ jobs:
             echo "::error::android.keystore is empty â€” check that the ANDROID_KEYSTORE_BASE64 secret is set correctly"
             exit 1
           fi
+          echo "Decoded keystore size: $(wc -c < android.keystore) bytes"
+          echo "SHA-256 of decoded keystore: $(sha256sum android.keystore | cut -d' ' -f1)"
+
+      - name: Verify keystore integrity
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if ! keytool -list -keystore android.keystore -storepass "$BUBBLEWRAP_KEYSTORE_PASSWORD" > /tmp/keytool_output.txt 2>&1; then
+            echo "::error::android.keystore failed integrity check â€” the file is corrupted, truncated, or the store password is wrong."
+            echo "This almost always means the ANDROID_KEYSTORE_BASE64 secret was copied incompletely."
+            echo "----- keytool output -----"
+            cat /tmp/keytool_output.txt
+            echo "---------------------------"
+            echo "Fix: regenerate the base64 with 'base64 -w0 salesapp.keystore > keystore.b64' and set the secret"
+            echo "from the file directly (e.g. via 'gh secret set ANDROID_KEYSTORE_BASE64 < keystore.b64')"
+            echo "rather than copy-pasting the string manually, to avoid truncation."
+            exit 1
+          fi
+          echo "Keystore integrity verified. Entries found:"
+          cat /tmp/keytool_output.txt
 
       - name: Configure Bubblewrap paths
         run: |
