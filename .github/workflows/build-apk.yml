@@ -55,23 +55,45 @@ jobs:
 
       - name: Ensure INTERNET permission is present
         run: |
-          MANIFEST_PATH="app/src/main/AndroidManifest.xml"
-          if [ -f "$MANIFEST_PATH" ]; then
-            if grep -q "android.permission.INTERNET" "$MANIFEST_PATH"; then
-              echo "INTERNET permission already present"
-            else
-              echo "INTERNET permission missing â€” patching manifest"
-              perl -0777 -pi -e 's/(<manifest\b[^>]*>)/$1\n    <uses-permission android:name="android.permission.INTERNET" \/>/' "$MANIFEST_PATH"
-            fi
-            if grep -q "android.permission.INTERNET" "$MANIFEST_PATH"; then
-              echo "Verified INTERNET permission is present:"
-              grep "uses-permission" "$MANIFEST_PATH"
-            else
-              echo "::error::Failed to add INTERNET permission to $MANIFEST_PATH"
+          set +e
+          echo "Looking for AndroidManifest.xml ..."
+          MANIFEST_PATH=$(find . -path ./node_modules -prune -o -name AndroidManifest.xml -print 2>/dev/null | grep "src/main/AndroidManifest.xml" | head -n 1)
+
+          if [ -z "$MANIFEST_PATH" ]; then
+            echo "::error::Could not locate an AndroidManifest.xml under src/main anywhere in the repo."
+            echo "Directory listing for debugging:"
+            find . -maxdepth 4 -type d
+            exit 1
+          fi
+
+          echo "Using manifest: $MANIFEST_PATH"
+          echo "----- BEFORE -----"
+          cat "$MANIFEST_PATH"
+          echo "-------------------"
+
+          if grep -q "android.permission.INTERNET" "$MANIFEST_PATH"; then
+            echo "INTERNET permission already present"
+          else
+            echo "INTERNET permission missing â€” patching manifest with Python"
+            echo "aW1wb3J0IHJlLCBzeXMKCnBhdGggPSBzeXMuYXJndlsxXQp3aXRoIG9wZW4ocGF0aCwgInIiLCBlbmNvZGluZz0idXRmLTgiKSBhcyBmOgogICAgY29udGVudCA9IGYucmVhZCgpCgptYXRjaCA9IHJlLnNlYXJjaChyIjxtYW5pZmVzdFxiW14+XSo+IiwgY29udGVudCkKaWYgbm90IG1hdGNoOgogICAgcHJpbnQoIjo6ZXJyb3I6OkNvdWxkIG5vdCBmaW5kIGFuIG9wZW5pbmcgPG1hbmlmZXN0PiB0YWcgdG8gcGF0Y2giLCBmaWxlPXN5cy5zdGRlcnIpCiAgICBzeXMuZXhpdCgxKQoKaW5zZXJ0aW9uID0gJ1xuICAgIDx1c2VzLXBlcm1pc3Npb24gYW5kcm9pZDpuYW1lPSJhbmRyb2lkLnBlcm1pc3Npb24uSU5URVJORVQiIC8+JwpwYXRjaGVkID0gY29udGVudFs6bWF0Y2guZW5kKCldICsgaW5zZXJ0aW9uICsgY29udGVudFttYXRjaC5lbmQoKTpdCgp3aXRoIG9wZW4ocGF0aCwgInciLCBlbmNvZGluZz0idXRmLTgiKSBhcyBmOgogICAgZi53cml0ZShwYXRjaGVkKQoKcHJpbnQoIlBhdGNoZWQgbWFuaWZlc3Qgc3VjY2Vzc2Z1bGx5IikK" | base64 -d > /tmp/patch_manifest.py
+            python3 /tmp/patch_manifest.py "$MANIFEST_PATH"
+            PY_STATUS=$?
+            if [ $PY_STATUS -ne 0 ]; then
+              echo "::error::Python patch step failed with exit code $PY_STATUS"
               exit 1
             fi
+          fi
+
+          echo "----- AFTER -----"
+          cat "$MANIFEST_PATH"
+          echo "------------------"
+
+          if grep -q "android.permission.INTERNET" "$MANIFEST_PATH"; then
+            echo "Verified INTERNET permission is present:"
+            grep "uses-permission" "$MANIFEST_PATH"
           else
-            echo "WARNING: $MANIFEST_PATH not found, skipping patch"
+            echo "::error::Failed to add INTERNET permission to $MANIFEST_PATH"
+            exit 1
           fi
 
       - name: Build signed APK and AAB
