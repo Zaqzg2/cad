@@ -57,13 +57,19 @@ jobs:
         run: |
           MANIFEST_PATH="app/src/main/AndroidManifest.xml"
           if [ -f "$MANIFEST_PATH" ]; then
-            if ! grep -q "android.permission.INTERNET" "$MANIFEST_PATH"; then
-              echo "INTERNET permission missing â€” patching manifest"
-              sed -i 's#<manifest[^>]*>#&\n    <uses-permission android:name="android.permission.INTERNET" />#' "$MANIFEST_PATH"
-            else
+            if grep -q "android.permission.INTERNET" "$MANIFEST_PATH"; then
               echo "INTERNET permission already present"
+            else
+              echo "INTERNET permission missing â€” patching manifest"
+              perl -0777 -pi -e 's/(<manifest\b[^>]*>)/$1\n    <uses-permission android:name="android.permission.INTERNET" \/>/' "$MANIFEST_PATH"
             fi
-            grep "uses-permission" "$MANIFEST_PATH"
+            if grep -q "android.permission.INTERNET" "$MANIFEST_PATH"; then
+              echo "Verified INTERNET permission is present:"
+              grep "uses-permission" "$MANIFEST_PATH"
+            else
+              echo "::error::Failed to add INTERNET permission to $MANIFEST_PATH"
+              exit 1
+            fi
           else
             echo "WARNING: $MANIFEST_PATH not found, skipping patch"
           fi
