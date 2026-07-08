@@ -1,0 +1,55 @@
+{
+  "packageId": "com.cady.salesapp",
+  "host": "zaqzg2.netlify.app",
+  "name": "Cady Sales App",
+  "launcherName": "Cady Sales",
+  "display": "standalone",
+  "themeColor": "#1A1A2E",
+  "navigationColor": "#1A1A2E",
+  "navigationColorDark": "#1A1A2E",
+  "navigationDividerColor": "#1A1A2E",
+  "navigationDividerColorDark": "#1A1A2E",
+  "backgroundColor": "#1A1A2E",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://zaqzg2.netlify.app/icons/icon-512.png",
+  "maskableIconUrl": "https://zaqzg2.netlify.app/icons/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "salesapp"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://zaqzg2.netlify.app/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": false
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://zaqzg2.netlify.app/",
+  "minSdkVersion": 21,
+  "orientation": "default",
+  "fingerprints": [
+    {
+      "name": "release",
+      "sha256_cert_fingerprints": "66:C8:01:B2:C4:B1:B3:DD:84:94:84:9D:FF:2B:C7:43:CC:9D:EF:51:6F:7E:C7:50:FB:D8:1C:C7:F9:DF:59:04"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "appVersion": "1.0.0",
+  "shareTarget": null
+}

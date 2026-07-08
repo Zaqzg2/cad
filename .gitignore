@@ -1,0 +1,7 @@
+android.keystore
+salesapp.keystore
+keystore.base64.txt
+app/
+*.apk
+*.aab
+node_modules/
