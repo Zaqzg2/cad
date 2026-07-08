@@ -51,7 +51,7 @@ jobs:
           cat ~/.bubblewrap/config.json
 
       - name: Generate Android project from twa-manifest.json
-        run: bubblewrap update --skipPwaValidation
+        run: bubblewrap update --skipPwaValidation --appVersionName="1.0.${{ github.run_number }}"
 
       - name: Ensure INTERNET permission is present
         run: |
